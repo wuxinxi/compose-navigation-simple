@@ -49,6 +49,9 @@ object ModelNavKey : RootNavKey
 @Serializable
 object SettingNaveKey : RootNavKey
 
+@Serializable
+object FavoritesNavKey : RootNavKey
+
 
 // dynamic root
 @Serializable

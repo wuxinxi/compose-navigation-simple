@@ -25,6 +25,7 @@ import cn.xxstudy.navigation.core.Navigator
 import cn.xxstudy.navigation.core.rememberNavigationState
 import cn.xxstudy.navigation.core.toEntries
 import cn.xxstudy.navigation.routes.AboutNavKey
+import cn.xxstudy.navigation.routes.FavoritesNavKey
 import cn.xxstudy.navigation.routes.HomeDetailNavKey
 import cn.xxstudy.navigation.routes.HomeNavKey
 import cn.xxstudy.navigation.routes.LanguageNavKey
@@ -39,7 +40,7 @@ import cn.xxstudy.navigation.routes.WifiNavKey
 fun HomePage() {
     val navState = rememberNavigationState(
         startNavKey = HomeNavKey,
-        topLevelKeys = listOf(HomeNavKey, SearchNavKey, ModelNavKey, SettingListNavKey)
+        topLevelKeys = listOf(HomeNavKey, SearchNavKey, FavoritesNavKey, ModelNavKey, SettingListNavKey)
     )
     val navigator = remember(navState) { Navigator(navState) }
 
@@ -58,6 +59,7 @@ fun HomePage() {
             HomeDetailScreen(navigator)
         }
         entry<SearchNavKey> { SearchScreen() }
+        entry<FavoritesNavKey> { FavoritesScreen() }
         entry<ModelNavKey> {
             Box(Modifier.fillMaxSize(), Alignment.Center) { Text("Model Content") }
         }
@@ -102,6 +104,12 @@ fun HomePage() {
                 onClick = { navigator.navigate(SearchNavKey) },
                 icon = { Text("S") },
                 label = { Text("Search") }
+            )
+            NavigationRailItem(
+                selected = navState.currentTopLevelKey == FavoritesNavKey,
+                onClick = { navigator.navigate(FavoritesNavKey) },
+                icon = { Text("F") },
+                label = { Text("Favorites") }
             )
             NavigationRailItem(
                 selected = navState.currentTopLevelKey == ModelNavKey,
