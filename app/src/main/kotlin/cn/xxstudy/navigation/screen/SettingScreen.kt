@@ -140,7 +140,7 @@ fun WifiDetailPane(navigator: Navigator) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp)
+            .padding(vertical = 32.dp)
     ) {
         Text("Wi-Fi Settings", style = MaterialTheme.typography.headlineLarge)
         Spacer(modifier = Modifier.height(16.dp))
@@ -155,7 +155,7 @@ fun LanguageDetailPane() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp)
+            .padding(vertical = 32.dp)
     ) {
         Text("Language Settings", style = MaterialTheme.typography.headlineLarge)
         Spacer(modifier = Modifier.height(16.dp))
@@ -168,7 +168,7 @@ fun AboutDetailPane() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp)
+            .padding(vertical = 32.dp)
     ) {
         Text("About", style = MaterialTheme.typography.headlineLarge)
         Spacer(modifier = Modifier.height(16.dp))

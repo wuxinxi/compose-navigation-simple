@@ -1,5 +1,6 @@
 package cn.xxstudy.navigation.screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,45 +8,86 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.rememberPaneExpansionState
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
+import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import cn.xxstudy.navigation.core.Navigator
 import cn.xxstudy.navigation.core.rememberNavigationState
 import cn.xxstudy.navigation.core.toEntries
+import cn.xxstudy.navigation.routes.AboutNavKey
 import cn.xxstudy.navigation.routes.HomeDetailNavKey
 import cn.xxstudy.navigation.routes.HomeNavKey
+import cn.xxstudy.navigation.routes.LanguageNavKey
 import cn.xxstudy.navigation.routes.ModelNavKey
 import cn.xxstudy.navigation.routes.SearchNavKey
+import cn.xxstudy.navigation.routes.SettingListNavKey
 import cn.xxstudy.navigation.routes.SettingNaveKey
+import cn.xxstudy.navigation.routes.WifiNavKey
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun HomePage() {
     val navState = rememberNavigationState(
         startNavKey = HomeNavKey,
-        topLevelKeys = listOf(HomeNavKey, SearchNavKey, ModelNavKey, SettingNaveKey)
+        topLevelKeys = listOf(HomeNavKey, SearchNavKey, ModelNavKey, SettingListNavKey)
     )
     val navigator = remember(navState) { Navigator(navState) }
 
-    val entries = navState.toEntries { key ->
-        when (key) {
-            is HomeNavKey -> NavEntry(key) { HomeScreen(navigator) }
-            is HomeDetailNavKey -> NavEntry(key) { HomeDetailScreen(navigator) }
-            is SearchNavKey -> NavEntry(key) { SearchScreen() }
-            is ModelNavKey -> NavEntry(key) {
-                Box(Modifier.fillMaxSize(), Alignment.Center) { Text("Model Content") }
-            }
-            is SettingNaveKey -> NavEntry(key) {
-                SettingScreen(navigator)
-            }
-            else -> NavEntry(key) {
-                Box(Modifier.fillMaxSize(), Alignment.Center) { Text("Unknown Page") }
-            }
+    val paneExpansionState = rememberPaneExpansionState()
+    val listDetailStrategy =
+        rememberListDetailSceneStrategy<NavKey>(paneExpansionState = paneExpansionState)
+
+    LaunchedEffect(Unit) {
+        paneExpansionState.setFirstPaneProportion(0.2f)
+    }
+
+
+    val entryProvider = entryProvider {
+        entry<HomeNavKey> { HomeScreen(navigator) }
+        entry<HomeDetailNavKey>(metadata = ListDetailSceneStrategy.detailPane()) {
+            HomeDetailScreen(navigator)
+        }
+        entry<SearchNavKey> { SearchScreen() }
+        entry<ModelNavKey> {
+            Box(Modifier.fillMaxSize(), Alignment.Center) { Text("Model Content") }
+        }
+        entry<SettingListNavKey>(
+            metadata = ListDetailSceneStrategy.listPane()
+        ) {
+            SettingPage(navigator = navigator)
+        }
+
+        entry<WifiNavKey>(
+            metadata = ListDetailSceneStrategy.detailPane(),
+        ) {
+            WifiDetailPane(navigator)
+        }
+
+        entry<LanguageNavKey>(
+            metadata = ListDetailSceneStrategy.detailPane(),
+        ) {
+            LanguageDetailPane()
+        }
+
+        entry<AboutNavKey>(
+            metadata = ListDetailSceneStrategy.detailPane(),
+        ) {
+            AboutDetailPane()
         }
     }
+
+    val entries = navState.toEntries(entryProvider)
+
 
     Row(modifier = Modifier.fillMaxSize()) {
         NavigationRail {
@@ -68,17 +110,20 @@ fun HomePage() {
                 label = { Text("Model") }
             )
             NavigationRailItem(
-                selected = navState.currentTopLevelKey == SettingNaveKey,
-                onClick = { navigator.navigate(SettingNaveKey) },
+                selected = navState.currentTopLevelKey == SettingListNavKey,
+                onClick = { navigator.navigate(SettingListNavKey) },
                 icon = { Text("S") },
                 label = { Text("Settings") }
             )
         }
-        
+
         NavDisplay(
             entries = entries,
-            modifier = Modifier.weight(1f),
-            onBack = { navigator.goBack() }
+            onBack = {
+                Log.d("SENSI", "NiaApp: call onBack....")
+                navigator.goBack()
+            },
+            sceneStrategies = listOf(listDetailStrategy)
         )
     }
 }

@@ -93,6 +93,14 @@ class Navigator(val state: NavigationState) {
             }
             add(key)
         }
+
+        if (key is SplitNavKey) {
+            val subStack = state.subStacks[key]
+            if (subStack != null && subStack.size == 1) {
+                // 只有 list key，没有 detail，添加默认 detail
+                subStack.add(key.defaultDetailKey)
+            }
+        }
     }
 
     /**

@@ -22,7 +22,9 @@ sealed interface SubNavKey : NavKey
 /**
  * 左右拆分的路由(Master-Detail)
  */
-sealed interface SplitNavKey : NavKey
+sealed interface SplitNavKey : NavKey {
+    val defaultDetailKey: NavKey
+}
 
 // Onboarding & Splash & MainApp
 @Serializable
@@ -67,7 +69,9 @@ object ManualModelNavKey : SubNavKey
 data class RecipeDetailNavKey(val id: Long) : SubNavKey
 
 @Serializable
-object SettingListNavKey : SplitNavKey
+object SettingListNavKey : SplitNavKey {
+    override val defaultDetailKey: NavKey = WifiNavKey
+}
 
 
 @Serializable

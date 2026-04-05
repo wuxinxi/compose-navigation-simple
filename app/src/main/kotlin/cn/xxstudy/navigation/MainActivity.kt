@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import cn.xxstudy.navigation.routes.LanguageNavKey
 import cn.xxstudy.navigation.routes.MainNavKey
@@ -50,29 +53,38 @@ fun AppRoot(modifier: Modifier = Modifier) {
         rootBackStack.add(key)
     }
 
-    val entries = rememberDecoratedNavEntries(rootBackStack, entryProvider = { key ->
-        when (key) {
-            is SplashNavKey -> NavEntry(key) {
-                SplashScreen(
-                    onNavigateToMain = { replaceWith(MainNavKey) },
-                    onNavigateToOnboarding = { replaceWith(LanguageNavKey) }
-                )
-            }
-            is LanguageNavKey -> NavEntry(key) {
-                LanguageScreen(onNext = { replaceWith(WifiNavKey) })
-            }
-            is WifiNavKey -> NavEntry(key) {
-                WifiListScreen(onNext = { replaceWith(PrivacyPolicyNavKey) })
-            }
-            is PrivacyPolicyNavKey -> NavEntry(key) {
-                PrivacyPolicyScreen(onNext = { replaceWith(MainNavKey) })
-            }
-            is MainNavKey -> NavEntry(key) {
-                HomePage()
-            }
-            else -> NavEntry(key) { }
+    val entryProvider = entryProvider {
+        entry<SplashNavKey> {
+            SplashScreen(
+                onNavigateToMain = { replaceWith(MainNavKey) },
+                onNavigateToOnboarding = { replaceWith(LanguageNavKey) }
+            )
         }
-    })
+
+        entry<LanguageNavKey> {
+            LanguageScreen(onNext = { replaceWith(WifiNavKey) })
+        }
+
+        entry<WifiNavKey> {
+            WifiListScreen(onNext = { replaceWith(PrivacyPolicyNavKey) })
+        }
+
+        entry<PrivacyPolicyNavKey> {
+            PrivacyPolicyScreen(onNext = { replaceWith(MainNavKey) })
+        }
+
+        entry<MainNavKey> {
+            HomePage()
+        }
+
+    }
+
+    val decorators = listOf(
+        rememberSaveableStateHolderNavEntryDecorator<NavKey>(),
+        rememberViewModelStoreNavEntryDecorator<NavKey>(),
+    )
+
+    val entries = rememberDecoratedNavEntries(rootBackStack, decorators, entryProvider)
 
     NavDisplay(
         entries = entries,

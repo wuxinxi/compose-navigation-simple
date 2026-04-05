@@ -14,6 +14,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import cn.xxstudy.navigation.routes.SplitNavKey
 
 /**
  * @data: 2026/3/26 15:39
@@ -27,7 +28,14 @@ fun rememberNavigationState(
     topLevelKeys: List<NavKey>,
 ): NavigationState {
     val topLevelStack = rememberNavBackStack(startNavKey)
-    val subStacks = topLevelKeys.associateWith { key -> rememberNavBackStack(key) }
+    val subStacks = topLevelKeys.associateWith { key ->
+        val defaultDetail = if (key is SplitNavKey) key.defaultDetailKey else null
+        if (defaultDetail != null) {
+            rememberNavBackStack(key, defaultDetail)
+        } else {
+            rememberNavBackStack(key)
+        }
+    }
     return remember(startNavKey, topLevelStack) {
         NavigationState(
             startNavKey = startNavKey,
