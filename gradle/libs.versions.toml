@@ -18,6 +18,8 @@ androidxComposeBom = "2026.03.01"
 
 navigation3 = "1.1.0-rc01"
 lifecycleViewmodel = "2.10.0"
+appcompat = "1.7.1"
+material = "1.13.0"
 
 
 [libraries]
@@ -55,8 +57,11 @@ androidx-compose-material3-adaptive-navigation3 = { group = "androidx.compose.ma
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanist" }
 accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanist" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin"}
+android-library = { id = "com.android.library", version.ref = "agp" }

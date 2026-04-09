@@ -13,15 +13,20 @@ import androidx.compose.material3.adaptive.layout.rememberPaneExpansionState
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.metadata
 import androidx.navigation3.ui.NavDisplay
+import cn.xxstudy.navigation.core.AppNavDisplay
 import cn.xxstudy.navigation.core.Navigator
+import cn.xxstudy.navigation.core.animation.NavigationAnimation
 import cn.xxstudy.navigation.core.rememberNavigationState
 import cn.xxstudy.navigation.core.toEntries
 import cn.xxstudy.navigation.routes.AboutNavKey
@@ -35,12 +40,22 @@ import cn.xxstudy.navigation.routes.SettingListNavKey
 import cn.xxstudy.navigation.routes.SettingNaveKey
 import cn.xxstudy.navigation.routes.WifiNavKey
 
+val LocalNavigator = staticCompositionLocalOf<Navigator> {
+    error("No Navigator provided! Make sure your component is wrapped inside NavDisplay.")
+}
+
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun HomePage() {
     val navState = rememberNavigationState(
         startNavKey = HomeNavKey,
-        topLevelKeys = listOf(HomeNavKey, SearchNavKey, FavoritesNavKey, ModelNavKey, SettingListNavKey)
+        topLevelKeys = listOf(
+            HomeNavKey,
+            SearchNavKey,
+            FavoritesNavKey,
+            ModelNavKey,
+            SettingListNavKey
+        )
     )
     val navigator = remember(navState) { Navigator(navState) }
 
@@ -54,8 +69,13 @@ fun HomePage() {
 
 
     val entryProvider = entryProvider {
-        entry<HomeNavKey> { HomeScreen(navigator) }
-        entry<HomeDetailNavKey>(metadata = ListDetailSceneStrategy.detailPane()) {
+        entry<HomeNavKey> { HomeScreen() }
+
+        entry<HomeDetailNavKey>(metadata = metadata {
+            ListDetailSceneStrategy.detailPane()
+            put(NavDisplay.TransitionKey) { NavigationAnimation.VerticalBottomUp.getTransition() }
+            put(NavDisplay.PopTransitionKey) { NavigationAnimation.VerticalBottomUp.getPopTransition() }
+        }) {
             HomeDetailScreen(navigator)
         }
         entry<SearchNavKey> { SearchScreen() }
@@ -125,13 +145,6 @@ fun HomePage() {
             )
         }
 
-        NavDisplay(
-            entries = entries,
-            onBack = {
-                Log.d("SENSI", "NiaApp: call onBack....")
-                navigator.goBack()
-            },
-            sceneStrategies = listOf(listDetailStrategy)
-        )
+        AppNavDisplay(navigator = navigator, entries = entries)
     }
 }

@@ -1,6 +1,8 @@
 package cn.xxstudy.navigation.screen
 
+import androidx.compose.ui.graphics.Color
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,12 +23,13 @@ import cn.xxstudy.navigation.routes.HomeDetailNavKey
 import kotlin.random.Random
 
 @Composable
-fun HomeScreen(navigator: Navigator) {
+fun HomeScreen() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
     ) {
+        val navigator = LocalNavigator.current
         var name by remember { mutableStateOf("ZH") }
 
         Text(
@@ -59,7 +62,9 @@ fun CustomText() {
 @Composable
 fun HomeDetailScreen(navigator: Navigator) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.Gray),
     ) {
         Text(
             text = "Home Detail",

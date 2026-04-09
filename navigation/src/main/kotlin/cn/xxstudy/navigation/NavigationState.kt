@@ -1,0 +1,84 @@
+package cn.xxstudy.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberDecoratedNavEntries
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+
+/**
+ * @data: 2026/3/26 15:39
+ * @author: sensiwu
+ * @remark:
+ */
+
+@Composable
+fun rememberNavigationState(
+    startNavKey: NavKey,
+    topLevelKeys: List<NavKey>,
+): NavigationState {
+    val topLevelStack = rememberNavBackStack(startNavKey)
+    val subStacks = topLevelKeys.associateWith { key ->
+        val defaultDetail = if (key is PaneNavKey) key.defaultDetailKey else null
+        if (defaultDetail != null) {
+            rememberNavBackStack(key, defaultDetail)
+        } else {
+            rememberNavBackStack(key)
+        }
+    }
+    return remember(startNavKey, topLevelStack) {
+        NavigationState(
+            startNavKey = startNavKey,
+            topLevelStack = topLevelStack,
+            subStacks = subStacks
+        )
+    }
+}
+
+class NavigationState(
+    val startNavKey: NavKey,
+    val topLevelStack: NavBackStack<NavKey>,
+    val subStacks: Map<NavKey, NavBackStack<NavKey>>
+) {
+    val currentTopLevelKey: NavKey by derivedStateOf { topLevelStack.last() }
+
+    val topLevelKeys
+        get() = subStacks.keys
+
+    val currentSubStack: NavBackStack<NavKey>
+        get() = subStacks[currentTopLevelKey]
+            ?: error("Sub stack for $currentTopLevelKey does not exist")
+
+    val currentKey: NavKey by derivedStateOf { currentSubStack.last() }
+
+}
+
+@Composable
+fun NavigationState.toEntries(
+    entryProvider: (NavKey) -> NavEntry<NavKey>,
+): SnapshotStateList<NavEntry<NavKey>> {
+    val decoratedEntries = subStacks.mapValues { (navKey, subStack) ->
+        key(navKey) {
+            val decorators = listOf(
+                rememberSaveableStateHolderNavEntryDecorator<NavKey>(),
+                rememberViewModelStoreNavEntryDecorator(),
+            )
+            rememberDecoratedNavEntries(
+                backStack = subStack,
+                entryDecorators = decorators,
+                entryProvider = entryProvider
+            )
+        }
+    }
+    return topLevelStack.flatMap { decoratedEntries[it] ?: emptyList() }
+        .toMutableStateList()
+}
